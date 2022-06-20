@@ -1,0 +1,17 @@
+protocol = "seek-compact"
+doc = ""
+traits = ["is-daemon"]
+
+[links]
+source = "https://github.com/yaq-project/yaqd-seek"
+bugtracker = "https://github.com/yaq-project/yaqd-seek/-/issues"
+
+[installation]
+PyPI = "https://pypi.org/project/yaqd-seek"
+
+[config]
+
+[state]
+
+[messages]
+
