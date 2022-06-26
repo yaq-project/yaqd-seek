@@ -143,9 +143,9 @@ class SeekCompact(HasMeasureTrigger):
 
     def _init_camera(self):
         self.dev.ctrl_transfer(0x41, SET_OPERATION_MODE, 0, 0, "\x00\x00")
-        self.firmware_info = dev.ctrl_transfer(0xC1, GET_FIRMWARE_INFO, 0, 0, 4)
+        self.firmware_info = self.dev.ctrl_transfer(0xC1, GET_FIRMWARE_INFO, 0, 0, 4)
 
-        self.chip_id = dev.ctrl_transfer(0xC1, READ_CHIP_ID, 0, 0, 12)
+        self.chip_id = self.dev.ctrl_transfer(0xC1, READ_CHIP_ID, 0, 0, 12)
 
         self.dev.ctrl_transfer(0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, '\x20\x00\x30\x00\x00\x00')
         # out = dev.ctrl_transfer(0xC1, GET_FACTORY_SETTINGS, 0, 0, 64)
