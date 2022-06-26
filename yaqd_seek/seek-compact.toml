@@ -1,6 +1,6 @@
 protocol = "seek-compact"
 doc = ""
-traits = ["is-daemon"]
+traits = ["is-daemon", "is-sensor", "has-measure-trigger"]
 
 [links]
 source = "https://github.com/yaq-project/yaqd-seek"
