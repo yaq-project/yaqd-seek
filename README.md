@@ -18,9 +18,11 @@ This package contains the following daemon(s):
   - `conda install yaqd-seek`
 - plug in device.  For me, two devices appeared (com.thermal.pir.206 and iAP interface)--no driver was found for either. I need to install a usb driver
   - download [Zadig](https://zadig.akeo.ie/)
-  - select `com.thermal.pir.206` device and install `WinUSB(libusb)` driver
+  - select `iAP` device and install `WinUSB(libusb)` driver
 
+## Notes
+- The camera is a USB male (micro, type C, or other), so you will need special USB adapters to use on computer usb ports.
 
 Maintainers:
 
-- This package is currently unmaintained!
+- [Dan Kohler](https://github.com/ddkohler)
