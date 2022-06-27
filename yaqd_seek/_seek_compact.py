@@ -54,9 +54,9 @@ class SeekCompact(HasMeasureTrigger):
         super().__init__(name, config, config_filepath)
         # 0010: Seek Thermal Compact/CompactXR
         # 0011: Seek Thermal CompactPRO -- unsupported atm
-        dev = usb.core.find(idVendor=0x289d, idProduct=0x0010)
+        dev = usb.core.find(idVendor=0x289D, idProduct=0x0010)
         if dev is None:
-                raise ValueError('Device not found')
+            raise ValueError("Device not found")
         self.dev = dev
         self.cal = 0
         dev.set_configuration()
@@ -65,20 +65,19 @@ class SeekCompact(HasMeasureTrigger):
         ep = usb.util.find_descriptor(
             interface,
             # match the first OUT endpoint
-            custom_match = \
-                lambda e: \
-                usb.util.endpoint_direction(e.bEndpointAddress) == \
-                    usb.util.ENDPOINT_OUT)
+            custom_match=lambda e: usb.util.endpoint_direction(e.bEndpointAddress)
+            == usb.util.ENDPOINT_OUT,
+        )
         assert ep is not None
 
         self.logger.debug(f"interface {interface}")
         try:
-            msg = '\x01'
+            msg = "\x01"
             dev.ctrl_transfer(0x41, TARGET_PLATFORM, 0, 0, msg)  # 84, TARGET_PLATFORM
         except Exception as e:
             self.logger.error(e)
             self.deinit()
-            msg = '\x01'
+            msg = "\x01"
             dev.ctrl_transfer(0x41, TARGET_PLATFORM, 0, 0, msg)
 
         self._init_camera()
@@ -87,10 +86,12 @@ class SeekCompact(HasMeasureTrigger):
         self._channel_shapes = {"img": (156, 208)}
 
     def deinit(self):
-        msg = '\x00\x00'
+        msg = "\x00\x00"
         self.logger.debug("deinit")
         for i in range(3):
-            self.dev.ctrl_transfer(0x41, SET_OPERATION_MODE, 0, 0, msg)  # Set Operation Mode 0x0000 (Sleep)
+            self.dev.ctrl_transfer(
+                0x41, SET_OPERATION_MODE, 0, 0, msg
+            )  # Set Operation Mode 0x0000 (Sleep)
 
     async def _measure(self):
         self.logger.debug("MEASURING")
@@ -98,8 +99,12 @@ class SeekCompact(HasMeasureTrigger):
         while True:
             try:
                 # 0x7ec0 = 32448 = 208 x 156  # note the 208--two rows not mentioned in docs--probably just dead
-                self.dev.ctrl_transfer(0x41, START_GET_IMAGE_TRANSFER, 
-                    0, 0, struct.pack("i", 208 * 156)  # '\xC0\x7E\x00\x00'
+                self.dev.ctrl_transfer(
+                    0x41,
+                    START_GET_IMAGE_TRANSFER,
+                    0,
+                    0,
+                    struct.pack("i", 208 * 156),  # '\xC0\x7E\x00\x00'
                 )
             except Exception as e:
                 self.logger.error(e)
@@ -109,10 +114,10 @@ class SeekCompact(HasMeasureTrigger):
                 data += self.dev.read(0x81, 0x3F60, 1000)
                 data += self.dev.read(0x81, 0x3F60, 1000)
                 data += self.dev.read(0x81, 0x3F60, 1000)
-            except Exception as e: # usb.USBError as e:
+            except Exception as e:  # usb.USBError as e:
                 self.logger.error(e)
             self.logger.debug(f"data type: {type(data)}")
-            self.logger.info(f"data len {len(data)}") # 64896 = 2 * 208 * 156
+            self.logger.info(f"data len {len(data)}")  # 64896 = 2 * 208 * 156
             data = np.frombuffer(data, dtype=np.uint16)
             img_code = data[10]
             self.logger.info(f"img code: {img_code}")
@@ -133,7 +138,7 @@ class SeekCompact(HasMeasureTrigger):
         return out
 
     def _deinit(self):
-        self._send_msg(0x40, SET_OPERATION_MODE, chr(0)*2)
+        self._send_msg(0x40, SET_OPERATION_MODE, chr(0) * 2)
         # 0x3c = 60  Set Operation Mode 0x0000 (Sleep)
 
     def close(self):
@@ -147,23 +152,33 @@ class SeekCompact(HasMeasureTrigger):
 
         self.chip_id = self.dev.ctrl_transfer(0xC1, READ_CHIP_ID, 0, 0, 12)
 
-        self.dev.ctrl_transfer(0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, '\x20\x00\x30\x00\x00\x00')
+        self.dev.ctrl_transfer(
+            0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, "\x20\x00\x30\x00\x00\x00"
+        )
         # out = dev.ctrl_transfer(0xC1, GET_FACTORY_SETTINGS, 0, 0, 64)
 
-        self.dev.ctrl_transfer(0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, '\x20\x00\x50\x00\x00\x00')
+        self.dev.ctrl_transfer(
+            0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, "\x20\x00\x50\x00\x00\x00"
+        )
         # out = dev.ctrl_transfer(0xC1, GET_FACTORY_SETTINGS, 0, 0, 64)
 
-        self.dev.ctrl_transfer(0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, '\x0C\x00\x70\x00\x00\x00')
+        self.dev.ctrl_transfer(
+            0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, "\x0C\x00\x70\x00\x00\x00"
+        )
         # out = dev.ctrl_transfer(0xC1, GET_FACTORY_SETTINGS, 0, 0, 24)
 
-        self.dev.ctrl_transfer(0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, '\x06\x00\x08\x00\x00\x00')
+        self.dev.ctrl_transfer(
+            0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, "\x06\x00\x08\x00\x00\x00"
+        )
         # out = dev.ctrl_transfer(0xC1, GET_FACTORY_SETTINGS, 0, 0, 12)
 
-        self.dev.ctrl_transfer(0x41, SET_IMAGE_PROCESSING_MODE, 0, 0, '\x08\x00')  # Set Image Processing Mode 0x0008
+        self.dev.ctrl_transfer(
+            0x41, SET_IMAGE_PROCESSING_MODE, 0, 0, "\x08\x00"
+        )  # Set Image Processing Mode 0x0008
         # out = dev.ctrl_transfer(0xC1, GET_OPERATION_MODE, 0, 0, 2)
 
-        self.dev.ctrl_transfer(0x41, SET_IMAGE_PROCESSING_MODE, 0, 0, '\x08\x00')  # Set Image Processing Mode  0x0008
-        self.dev.ctrl_transfer(0x41, SET_OPERATION_MODE, 0, 0, '\x01\x00')  # 0x0001 (Run)
-        # out = dev.ctrl_transfer(0xC1, GET_OPERATION_MODE, 0x3D, 0, 0, 2) 
-
-
+        self.dev.ctrl_transfer(
+            0x41, SET_IMAGE_PROCESSING_MODE, 0, 0, "\x08\x00"
+        )  # Set Image Processing Mode  0x0008
+        self.dev.ctrl_transfer(0x41, SET_OPERATION_MODE, 0, 0, "\x01\x00")  # 0x0001 (Run)
+        # out = dev.ctrl_transfer(0xC1, GET_OPERATION_MODE, 0x3D, 0, 0, 2)
