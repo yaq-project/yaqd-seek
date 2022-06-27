@@ -49,6 +49,7 @@ WRITE_MEMORY_DATA = 80
 
 sl =(slice(None, -1, None), slice(None, -2, None))
 
+
 class SeekCompact(HasMeasureTrigger):
     _kind = "seek-compact"
 
@@ -95,7 +96,6 @@ class SeekCompact(HasMeasureTrigger):
             self.dev.ctrl_transfer(0x41, SET_OPERATION_MODE, 0, 0, msg)  # Set Operation Mode 0x0000 (Sleep)
 
     async def _measure(self):
-        self.logger.debug("MEASURING")
         out = {}
         while True:
             try:
@@ -115,32 +115,27 @@ class SeekCompact(HasMeasureTrigger):
                 self.logger.error(e)
                 sleep(0.1)
                 continue
-            # self.logger.debug(f"data type: {type(data)}")
-            # self.logger.info(f"data len {len(data)}") # 64896 = 2 * 208 * 156
+            self.logger.debug(f"data len {len(data)}") # 64896 = 2 * 208 * 156
             data = np.frombuffer(data, dtype=np.uint16)
             img_code = data[10]
-            # self.logger.info(f"img code: {img_code}")
+            self.logger.debug(f"img code: {img_code}")
             if img_code == 3:
                 break
             elif img_code == 1:  # new cal image
-                self.logger.info("new cal")
-                try:
-                    # if self.cal == 0:  # find the dead pixels
-                    self.cal = data.reshape(156, 208)[sl]
-                    dmean = self.cal.mean()
-                    self.dead_pixels = np.where(self.cal < 0.3 * dmean)
-                    self.logger.info(f"dead pixels: {self.dead_pixels}")
-                    # else:
-                    #     self.cal = data.reshape(156, 208)[sl]
-                    self.logger.info(f"cal data {data[:20]}")
-                    self.logger.info(f"cal 0,40 = {self.cal[0,40]}")
-                    continue
-                except Exception as e:
-                    self.logger.error(e)
+                first_time = isinstance(self.cal, int)
+                self.cal = data.reshape(156, 208)[sl]
+                if first_time:  # find the dead pixels
+                    try:
+                        dmean = self.cal.mean()
+                        self.dead_pixels = np.where(self.cal < 0.3 * dmean)
+                        self.logger.info(f"dead pixels: {self.dead_pixels}")
+                    except Exception as e:
+                        self.logger.error(e)
+                self.logger.debug(f"cal 0,40 = {self.cal[0,40]}")
+                continue
         try:
-            # self.logger.info(f"data {data[:20]}")
             # data is a list of 16 bit data (i.e. 2 * 208 * 156 bytes)
-            data = data.reshape(156, 208)[sl] + 2000
+            data = data.reshape(156, 208)[sl] + 2000  # offset to prevent underflow uint values
             data -= self.cal
             # self.logger.info(f"data shape {data.shape}")
             for xi, yi in zip(*self.dead_pixels):  # median filter to replace dead pixels
