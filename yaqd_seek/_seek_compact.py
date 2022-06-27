@@ -6,6 +6,7 @@ import numpy as np
 
 from yaqd_core import HasMeasureTrigger
 import usb, struct
+from time import sleep
 
 
 BEGIN_MEMORY_WRITE = 82
@@ -46,6 +47,7 @@ TOGGLE_SHUTTER = 55
 UPLOAD_FIRMWARE_ROW_SIZE = 79
 WRITE_MEMORY_DATA = 80
 
+sl =(slice(None, -1, None), slice(None, -2, None))
 
 class SeekCompact(HasMeasureTrigger):
     _kind = "seek-compact"
@@ -84,7 +86,7 @@ class SeekCompact(HasMeasureTrigger):
         self._init_camera()
         self._channel_names = ["img"]
         self._channel_units = {"img": "counts"}
-        self._channel_shapes = {"img": (156, 208)}
+        self._channel_shapes = {"img": (155, 206)}
 
     def deinit(self):
         msg = '\x00\x00'
@@ -99,7 +101,7 @@ class SeekCompact(HasMeasureTrigger):
             try:
                 # 0x7ec0 = 32448 = 208 x 156  # note the 208--two rows not mentioned in docs--probably just dead
                 self.dev.ctrl_transfer(0x41, START_GET_IMAGE_TRANSFER, 
-                    0, 0, struct.pack("i", 208 * 156)  # '\xC0\x7E\x00\x00'
+                    0, 0, struct.pack("i", 208 * 156)
                 )
             except Exception as e:
                 self.logger.error(e)
@@ -109,27 +111,52 @@ class SeekCompact(HasMeasureTrigger):
                 data += self.dev.read(0x81, 0x3F60, 1000)
                 data += self.dev.read(0x81, 0x3F60, 1000)
                 data += self.dev.read(0x81, 0x3F60, 1000)
-            except Exception as e: # usb.USBError as e:
+            except usb.USBError as e:
                 self.logger.error(e)
-            self.logger.debug(f"data type: {type(data)}")
-            self.logger.info(f"data len {len(data)}") # 64896 = 2 * 208 * 156
+                sleep(0.1)
+                continue
+            # self.logger.debug(f"data type: {type(data)}")
+            # self.logger.info(f"data len {len(data)}") # 64896 = 2 * 208 * 156
             data = np.frombuffer(data, dtype=np.uint16)
             img_code = data[10]
-            self.logger.info(f"img code: {img_code}")
-            if img_code == 1:  # new cal image
-                self.logger.info("new cal")
-                self.cal = data.reshape(156, -1)
-                self.logger.info(f"data {data[:20]}")
-                continue
+            # self.logger.info(f"img code: {img_code}")
             if img_code == 3:
                 break
+            elif img_code == 1:  # new cal image
+                self.logger.info("new cal")
+                try:
+                    # if self.cal == 0:  # find the dead pixels
+                    self.cal = data.reshape(156, 208)[sl]
+                    dmean = self.cal.mean()
+                    self.dead_pixels = np.where(self.cal < 0.3 * dmean)
+                    self.logger.info(f"dead pixels: {self.dead_pixels}")
+                    # else:
+                    #     self.cal = data.reshape(156, 208)[sl]
+                    self.logger.info(f"cal data {data[:20]}")
+                    self.logger.info(f"cal 0,40 = {self.cal[0,40]}")
+                    continue
+                except Exception as e:
+                    self.logger.error(e)
         try:
-            self.logger.info(f"data {data[:20]}")
+            # self.logger.info(f"data {data[:20]}")
             # data is a list of 16 bit data (i.e. 2 * 208 * 156 bytes)
-            out["img"] = data.reshape(156, -1) + 1200 - self.cal
-            self.logger.info(f"data shape {data.shape}")
+            data = data.reshape(156, 208)[sl] + 2000
+            data -= self.cal
+            # self.logger.info(f"data shape {data.shape}")
+            for xi, yi in zip(*self.dead_pixels):  # median filter to replace dead pixels
+                xmin, xmax = max(0, xi-1), min(xi+2, data.shape[0]+1)
+                ymin, ymax = max(0, yi-1), min(yi+2, data.shape[1]+1)
+                sli = (slice(xmin, xmax, None), slice(ymin, ymax, None))
+                old = data[xi, yi]
+                data[xi, yi] = np.median(data[sli])
+                # self.logger.info(f"{xi},{yi}: [{xmin}:{xmax},{ymin}:{ymax}] {old}->{data[xi,yi]}")
+            # force pixel 1 and 40 to zero
+            data[0,1] = np.median(data[0:2,1:3])
+            data[0,40] = np.median(data[0:2,39:42])
         except Exception as e:
             self.logger.error(e)
+        # self.logger.info(f"is 0,1 a dead pixel? cal {self.cal[0,1], data[0,1]}")
+        out["img"] = data[:, ::-1]
         return out
 
     def _deinit(self):
