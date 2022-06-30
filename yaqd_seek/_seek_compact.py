@@ -70,8 +70,7 @@ class SeekCompact(HasMeasureTrigger):
             # match the first OUT endpoint
             custom_match = \
                 lambda e: \
-                usb.util.endpoint_direction(e.bEndpointAddress) == \
-                    usb.util.ENDPOINT_OUT)
+                usb.util.endpoint_direction(e.bEndpointAddress) == usb.util.ENDPOINT_OUT)
         assert ep is not None
 
         self.logger.debug(f"interface {interface}")
@@ -99,7 +98,8 @@ class SeekCompact(HasMeasureTrigger):
         out = {}
         while True:
             try:
-                # 0x7ec0 = 32448 = 208 x 156  # note the 208--two rows not mentioned in docs--probably just dead
+                # 0x7ec0 = 32448 = 208 x 156
+                # note the 208--two extra dead rows
                 self.dev.ctrl_transfer(0x41, START_GET_IMAGE_TRANSFER, 
                     0, 0, struct.pack("i", 208 * 156)
                 )
@@ -115,6 +115,7 @@ class SeekCompact(HasMeasureTrigger):
                 self.logger.error(e)
                 sleep(0.1)
                 continue
+            # data should be a list of 16 bit data (i.e. 2 * 208 * 156 bytes)
             self.logger.debug(f"data len {len(data)}") # 64896 = 2 * 208 * 156
             data = np.frombuffer(data, dtype=np.uint16)
             img_code = data[10]
@@ -134,7 +135,6 @@ class SeekCompact(HasMeasureTrigger):
                 self.logger.debug(f"cal 0,40 = {self.cal[0,40]}")
                 continue
         try:
-            # data is a list of 16 bit data (i.e. 2 * 208 * 156 bytes)
             data = data.reshape(156, 208)[sl] + 2000  # offset to prevent underflow uint values
             data -= self.cal
             # self.logger.info(f"data shape {data.shape}")
@@ -159,9 +159,7 @@ class SeekCompact(HasMeasureTrigger):
         # 0x3c = 60  Set Operation Mode 0x0000 (Sleep)
 
     def close(self):
-        # atm it doesn't seem like I need to do anything special
         self.dev.reset()
-        pass
 
     def _init_camera(self):
         self.dev.ctrl_transfer(0x41, SET_OPERATION_MODE, 0, 0, "\x00\x00")
