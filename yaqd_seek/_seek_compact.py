@@ -100,7 +100,7 @@ class SeekCompact(HasMeasureTrigger):
             try:
                 # 0x7ec0 = 32448 = 208 x 156
                 # note the 208--two extra dead rows
-                self.dev.ctrl_transfer(0x41, START_GET_IMAGE_TRANSFER, 
+                self.dev.ctrl_transfer(0x41, START_GET_IMAGE_TRANSFER,
                     0, 0, struct.pack("i", 208 * 156)
                 )
             except Exception as e:
@@ -184,6 +184,6 @@ class SeekCompact(HasMeasureTrigger):
 
         self.dev.ctrl_transfer(0x41, SET_IMAGE_PROCESSING_MODE, 0, 0, '\x08\x00')  # Set Image Processing Mode  0x0008
         self.dev.ctrl_transfer(0x41, SET_OPERATION_MODE, 0, 0, '\x01\x00')  # 0x0001 (Run)
-        # out = dev.ctrl_transfer(0xC1, GET_OPERATION_MODE, 0x3D, 0, 0, 2) 
+        # out = dev.ctrl_transfer(0xC1, GET_OPERATION_MODE, 0x3D, 0, 0, 2)
 
 
