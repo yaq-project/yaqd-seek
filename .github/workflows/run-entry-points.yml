@@ -25,5 +25,5 @@ jobs:
         python -m pip install --upgrade .
     - name: Test with pytest
       run: |
-        seek-compact --version
-        seek-compact --help
+        yaqd-seek-compact --version
+        yaqd-seek-compact --help

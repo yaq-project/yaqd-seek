@@ -1,9 +1,9 @@
 import numpy as np
-import yaqc
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-import matplotlib
 import time
+import yaqc  # type: ignore
+import matplotlib.pyplot as plt  # type: ignore
+import matplotlib.animation as animation  # type: ignore
+import matplotlib  # type: ignore
 
 cam = yaqc.Client(39005)
 cam.measure()
