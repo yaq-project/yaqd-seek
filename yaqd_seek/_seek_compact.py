@@ -5,7 +5,8 @@ from typing import Dict, Any, List
 import numpy as np
 
 from yaqd_core import HasMeasureTrigger
-import usb, struct
+import usb  # type: ignore
+import struct
 from time import sleep
 
 
