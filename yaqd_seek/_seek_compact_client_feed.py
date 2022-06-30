@@ -12,12 +12,14 @@ time.sleep(0.5)
 fig = plt.figure()
 
 ax = plt.subplot(111)
-ax_im = plt.imshow(cam.get_measured()["img"], origin="lower", norm = matplotlib.colors.Normalize())
+ax_im = plt.imshow(cam.get_measured()["img"], origin="lower", norm=matplotlib.colors.Normalize())
+
 
 def update_img(y):
     ax_im.set_data(y)
     ax_im.set_norm(matplotlib.colors.Normalize())
     plt.draw()
+
 
 def data_gen():
     index = 0
@@ -31,6 +33,7 @@ def data_gen():
                 break
             else:
                 time.sleep(0.1)
+
 
 ani = animation.FuncAnimation(fig, update_img, data_gen, interval=100)
 plt.show()
