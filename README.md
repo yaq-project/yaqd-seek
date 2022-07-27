@@ -14,9 +14,9 @@ This package contains the following daemon(s):
 - https://yaq.fyi/daemons/seek-compact
 
 ## Installation (Windows)
-- install yaqd-seek and all dependencies.
+1. install yaqd-seek and all dependencies.
   - `conda install yaqd-seek`
-- plug in device.  For me, two devices appeared (com.thermal.pir.206 and iAP interface)--no driver was found for either. I need to install a usb driver
+2. plug in device.  For me, two devices appeared (com.thermal.pir.206 and iAP interface)--no driver was found for either. I need to install a usb driver
   - download [Zadig](https://zadig.akeo.ie/)
   - select `iAP` device and install `WinUSB(libusb)` driver
 
