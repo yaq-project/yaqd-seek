@@ -138,7 +138,7 @@ class SeekCompact(HasMeasureTrigger):
                 self.logger.debug(f"cal 0,40 = {self.cal[0,40]}")
                 continue
         try:
-            data = data.reshape(156, 208)[sl]
+            data = data.reshape(156, 208)[sl].astype(np.int32)
             data -= self.cal
             # self.logger.info(f"data shape {data.shape}")
             for xi, yi in zip(*self.dead_pixels):  # median filter to replace dead pixels
