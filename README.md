@@ -7,7 +7,7 @@
 [![ver](https://img.shields.io/badge/calver-YYYY.M.MICRO-blue)](https://calver.org/)
 [![log](https://img.shields.io/badge/change-log-informational)](https://github.com/yaq-project/yaqd-seek/-/blob/main/CHANGELOG.md)
 
-yaq daemons for Seek thermal cameras
+yaq daemons for [Seek Thermal](https://www.thermal.com/) cameras
 
 This package contains the following daemon(s):
 
