@@ -20,7 +20,7 @@ def plot_feed(port, host=None):
 
     ax = plt.subplot()
     im0 = cam.get_measured()["img"]
-    ax_im = plt.imshow(im0, origin="lower", norm = matplotlib.colors.Normalize())
+    ax_im = plt.imshow(im0, origin="lower", norm=matplotlib.colors.Normalize())
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cbar = plt.colorbar(ax_im, cax=cax)
@@ -31,7 +31,7 @@ def plot_feed(port, host=None):
         ax_im.set_norm(matplotlib.colors.Normalize(y.min(), y.max()))
         cbar_ticks = np.linspace(np.nanmin(y), np.nanmax(y), num=6, endpoint=True)
         cbar.set_ticks(cbar_ticks)
-        cbar.draw_all() 
+        cbar.draw_all()
         plt.draw()
 
     def data_gen():
@@ -53,8 +53,8 @@ def plot_feed(port, host=None):
 
 def main():
     """Initialize application and main window."""
-    port = int(sys.argv[1])    
-    host = None if len(sys.argv)==2 else argv[2]
+    port = int(sys.argv[1])
+    host = None if len(sys.argv) == 2 else argv[2]
     ani = plot_feed(port, host)
     plt.show()
     # sys.exit(app.exec_())

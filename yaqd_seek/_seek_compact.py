@@ -132,7 +132,9 @@ class SeekCompact(HasMeasureTrigger):
                     try:
                         dmean = self.cal.mean()
                         self.dead_pixels = np.where(self.cal < 0.3 * dmean)
-                        self.logger.info(f"dead pixels: {[(x,y) for x,y in zip(*self.dead_pixels)]}")
+                        self.logger.info(
+                            f"dead pixels: {[(x,y) for x,y in zip(*self.dead_pixels)]}"
+                        )
                     except Exception as e:
                         self.logger.error(e)
                 self.logger.debug(f"cal 0,40 = {self.cal[0,40]}")
