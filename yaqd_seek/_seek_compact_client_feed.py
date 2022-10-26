@@ -4,6 +4,7 @@ import sys
 import yaqc  # type: ignore
 import matplotlib.pyplot as plt  # type: ignore
 import matplotlib.animation as animation  # type: ignore
+from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
 import matplotlib  # type: ignore
 
 
@@ -17,13 +18,20 @@ def plot_feed(port, host=None):
 
     fig = plt.figure()
 
-    ax = plt.subplot(111)
+    ax = plt.subplot()
     im0 = cam.get_measured()["img"]
     ax_im = plt.imshow(im0, origin="lower", norm = matplotlib.colors.Normalize())
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    cbar = plt.colorbar(ax_im, cax=cax)
+    cbar.set_ticks(np.linspace(np.nanmin(im0), np.nanmax(im0), 6))
 
     def update_img(y):
         ax_im.set_data(y)
-        ax_im.set_norm(matplotlib.colors.Normalize())
+        ax_im.set_norm(matplotlib.colors.Normalize(y.min(), y.max()))
+        cbar_ticks = np.linspace(np.nanmin(y), np.nanmax(y), num=6, endpoint=True)
+        cbar.set_ticks(cbar_ticks)
+        cbar.draw_all() 
         plt.draw()
 
     def data_gen():
