@@ -8,18 +8,19 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
 import matplotlib  # type: ignore
 
 
-def plot_feed(port, host=None):
+def plot_feed(port, host=None, bg_subtract=False):
     if host is None:
-        cam = yaqc.Client(port)
+        cam = yaqc.Client(int(port))
     else:
-        cam = yaqc.Client(port, host=host)
+        cam = yaqc.Client(int(port), host=host)
     cam.measure()
     time.sleep(0.5)
+    ref = cam.get_measured()["img"] if bg_subtract else 0
 
     fig = plt.figure()
 
     ax = plt.subplot()
-    im0 = cam.get_measured()["img"]
+    im0 = cam.get_measured()["img"] - ref
     ax_im = plt.imshow(im0, origin="lower", norm=matplotlib.colors.Normalize())
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
@@ -27,6 +28,7 @@ def plot_feed(port, host=None):
     cbar.set_ticks(np.linspace(np.nanmin(im0), np.nanmax(im0), 6))
 
     def update_img(y):
+        y -= ref
         ax_im.set_data(y)
         ax_im.set_norm(matplotlib.colors.Normalize(y.min(), y.max()))
         cbar_ticks = np.linspace(np.nanmin(y), np.nanmax(y), num=6, endpoint=True)
@@ -55,7 +57,10 @@ def main():
     """Initialize application and main window."""
     port = int(sys.argv[1])
     host = None if len(sys.argv) == 2 else argv[2]
-    ani = plot_feed(port, host)
+    ani = plot_feed(
+        argv[1],
+        **dict(arg.split('=') for arg in sys.argv[2:])
+    )
     plt.show()
     # sys.exit(app.exec_())
 
