@@ -57,10 +57,7 @@ def main():
     """Initialize application and main window."""
     port = int(sys.argv[1])
     host = None if len(sys.argv) == 2 else argv[2]
-    ani = plot_feed(
-        argv[1],
-        **dict(arg.split('=') for arg in sys.argv[2:])
-    )
+    ani = plot_feed(argv[1], **dict(arg.split("=") for arg in sys.argv[2:]))
     plt.show()
     # sys.exit(app.exec_())
 
