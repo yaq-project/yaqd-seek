@@ -8,9 +8,9 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
 import matplotlib  # type: ignore
 
 
-def gen_rotator(r:int=None):
+def gen_rotator(r: int = None):
     reverse = slice(None, None, -1)
-    axes = [0,1] if r in [0, 180] else [1,0]
+    axes = [0, 1] if r in [0, 180] else [1, 0]
     if r is None:
         sls = (None, None)
     if r == 90:
@@ -88,10 +88,7 @@ def plot_feed(port, host=None, bg_subtract=False, rotation=None):
 def main():
     """Initialize application and main window."""
     port = int(sys.argv[1])
-    ani = plot_feed(
-        port,
-        **dict(arg.split('=') for arg in sys.argv[2:])
-    )
+    ani = plot_feed(port, **dict(arg.split("=") for arg in sys.argv[2:]))
     plt.show()
     # sys.exit(app.exec_())
 
