@@ -53,6 +53,11 @@
                 "string"
             ]
         },
+        "pixel_pitch": {
+            "default": 12,
+            "doc": "Pixel spacing, in microns",
+            "type": "float"
+        },
         "port": {
             "doc": "TCP port for daemon to occupy.",
             "origin": "is-daemon",

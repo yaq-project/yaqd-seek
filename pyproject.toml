@@ -30,6 +30,7 @@ dev = ["black", "pre-commit"]
 
 [tool.flit.scripts]
 yaqd-seek-compact = "yaqd_seek._seek_compact:SeekCompact.main"
+yaqd-seek-client = "yaqd_seek._seek_compact_client_feed:main"
 
 
 [tool.black]

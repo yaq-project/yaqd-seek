@@ -11,6 +11,10 @@ PyPI = "https://pypi.org/project/yaqd-seek"
 
 [config]
 
+pixel_pitch.type = "float"
+pixel_pitch.doc = "Pixel spacing, in microns"
+pixel_pitch.default = 12
+
 [state]
 
 [messages]

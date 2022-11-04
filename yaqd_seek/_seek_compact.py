@@ -120,7 +120,7 @@ class SeekCompact(HasMeasureTrigger):
                 continue
             # data should be a list of 16 bit data (i.e. 2 * 208 * 156 bytes)
             self.logger.debug(f"data len {len(data)}")  # 64896 = 2 * 208 * 156
-            data = np.frombuffer(data, dtype=np.uint16)
+            data = np.frombuffer(data, dtype=np.int16)
             img_code = data[10]
             self.logger.debug(f"img code: {img_code}")
             if img_code == 3:
@@ -132,13 +132,15 @@ class SeekCompact(HasMeasureTrigger):
                     try:
                         dmean = self.cal.mean()
                         self.dead_pixels = np.where(self.cal < 0.3 * dmean)
-                        self.logger.info(f"dead pixels: {self.dead_pixels}")
+                        self.logger.info(
+                            f"dead pixels: {[(x,y) for x,y in zip(*self.dead_pixels)]}"
+                        )
                     except Exception as e:
                         self.logger.error(e)
                 self.logger.debug(f"cal 0,40 = {self.cal[0,40]}")
                 continue
         try:
-            data = data.reshape(156, 208)[sl] + 2000  # offset to prevent underflow uint values
+            data = data.reshape(156, 208)[sl].astype(np.int32)
             data -= self.cal
             # self.logger.info(f"data shape {data.shape}")
             for xi, yi in zip(*self.dead_pixels):  # median filter to replace dead pixels
