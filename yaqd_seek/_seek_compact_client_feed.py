@@ -8,24 +8,24 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
 import matplotlib  # type: ignore
 
 
-def gen_rotator(r: int = None):
+def gen_rotator(angle: int):
     reverse = slice(None, None, -1)
     none = slice(None, None, None)
-    axes = [0, 1] if r in [0, 180] else [1, 0]
-    if r is None:
+    axes = [0, 1] if angle in [0, 180] else [1, 0]
+    if angle == 0:
         sls = (none, none)
-    if r == 90:
+    elif angle == 90:
         sls = (reverse, none)
-    elif r == 180:
+    elif angle == 180:
         sls = (reverse, reverse)
-    elif r == 270:
+    elif angle == 270:
         sls = (none, reverse)
     else:
         raise ValueError
     return lambda x: x[sls].transpose(*axes)
 
 
-def plot_feed(port, host=None, bg_subtract=False, rotation=None):
+def plot_feed(port, host=None, bg_subtract=False, rotation=0):
     """
     Parameters
     ----------
@@ -50,14 +50,13 @@ def plot_feed(port, host=None, bg_subtract=False, rotation=None):
     fig = plt.figure()
 
     ax = plt.subplot()
-    ax.ax.tick_params(labelsize=16)
     im0 = cam.get_measured()["img"] - ref
     ax_im = plt.imshow(rotator(im0), origin="lower", norm=matplotlib.colors.Normalize())
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     cbar = plt.colorbar(ax_im, cax=cax)
     cbar.set_ticks(np.linspace(np.nanmin(im0), np.nanmax(im0), 6))
-    for axes in [cbar.ax, ax.axes]:
+    for axes in [ax.axes, cax.axes]:
         axes.tick_params(labelsize=16)
 
     def update_img(y):
