@@ -10,15 +10,16 @@ import matplotlib  # type: ignore
 
 def gen_rotator(r: int = None):
     reverse = slice(None, None, -1)
+    none = slice(None, None, None)
     axes = [0, 1] if r in [0, 180] else [1, 0]
     if r is None:
-        sls = (None, None)
+        sls = (none, none)
     if r == 90:
-        sls = (reverse, None)
+        sls = (reverse, none)
     elif r == 180:
         sls = (reverse, reverse)
     elif r == 270:
-        sls = (None, reverse)
+        sls = (none, reverse)
     else:
         raise ValueError
     return lambda x: x[sls].transpose(*axes)
