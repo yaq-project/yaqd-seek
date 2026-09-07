@@ -9,7 +9,6 @@ import usb  # type: ignore
 import struct
 from time import sleep
 
-
 BEGIN_MEMORY_WRITE = 82
 COMPLETE_MEMORY_WRITE = 81
 GET_BIT_DATA = 59
@@ -183,7 +182,7 @@ class SeekCompact(HasMeasureTrigger):
         # out = dev.ctrl_transfer(0xC1, GET_FACTORY_SETTINGS, 0, 0, 64)
 
         self.dev.ctrl_transfer(
-            0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, "\x0C\x00\x70\x00\x00\x00"
+            0x41, SET_FACTORY_SETTINGS_FEATURES, 0, 0, "\x0c\x00\x70\x00\x00\x00"
         )
         # out = dev.ctrl_transfer(0xC1, GET_FACTORY_SETTINGS, 0, 0, 24)
 
